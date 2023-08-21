@@ -985,7 +985,7 @@ register_conv_template(
         offset=0,
         sep_style=SeparatorStyle.CHATML,
         sep="<|im_end|>",
-        stop_token_ids=[50278, 0],
+        stop_str="<|im_start|>"
     )
 )
 
