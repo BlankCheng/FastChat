@@ -12,6 +12,7 @@ import time
 import shortuuid
 import torch
 from tqdm import tqdm
+from icecream import ic
 
 from fastchat.llm_judge.common import load_questions, temperature_config
 from fastchat.model import load_model, get_conversation_template
@@ -96,12 +97,17 @@ def get_model_answers(
         for i in range(num_choices):
             torch.manual_seed(i)
             conv = get_conversation_template(model_id)
+            ic(conv.name)
+            ic(conv.roles)
+            ic(conv.system_template)
+            ic(conv.system_message)
             turns = []
             for j in range(len(question["turns"])):
                 qs = question["turns"][j]
                 conv.append_message(conv.roles[0], qs)
                 conv.append_message(conv.roles[1], None)
                 prompt = conv.get_prompt()
+                ic(prompt)
                 input_ids = tokenizer([prompt]).input_ids
 
                 if temperature < 1e-4:
