@@ -971,6 +971,25 @@ register_conv_template(
     )
 )
 
+
+# XChat default template
+# TODO: Confirm system message and formatting
+register_conv_template(
+    Conversation(
+        name="xchat",
+        system_template="""<|im_start|>system
+{system_message}""",
+        system_message="""A conversation between a user and an LLM-based AI assistant. The assistant gives helpful and honest answers.""",
+        roles=("<|im_start|>user", "<|im_start|>assistant"),
+        messages=(),
+        offset=0,
+        sep_style=SeparatorStyle.CHATML,
+        sep="<|im_end|>",
+        stop_token_ids=[50278, 0],
+    )
+)
+
+
 if __name__ == "__main__":
     print("Vicuna template:")
     conv = get_conv_template("vicuna_v1.1")
@@ -985,6 +1004,17 @@ if __name__ == "__main__":
     print("Llama-2 template:")
     conv = get_conv_template("llama-2")
     conv.set_system_message("You are a helpful, respectful and honest assistant.")
+    conv.append_message(conv.roles[0], "Hello!")
+    conv.append_message(conv.roles[1], "Hi!")
+    conv.append_message(conv.roles[0], "How are you?")
+    conv.append_message(conv.roles[1], None)
+    print(conv.get_prompt())
+
+    print("\n")
+
+    print("XChat template:")
+    conv = get_conv_template("xchat")
+    conv.set_system_message("You are a helpful, respectful and honest assistant developed by XLang.")
     conv.append_message(conv.roles[0], "Hello!")
     conv.append_message(conv.roles[1], "Hi!")
     conv.append_message(conv.roles[0], "How are you?")

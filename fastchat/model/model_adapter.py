@@ -1463,6 +1463,39 @@ class VigogneChatAdapter(BaseModelAdapter):
         return get_conv_template("vigogne-chat")
 
 
+class XChatAdapter(BaseModelAdapter):
+    """The model adapter for MPT series (mosaicml/mpt-7b-chat, mosaicml/mpt-30b-chat)"""
+
+    def match(self, model_path: str):
+        model_path = model_path.lower()
+        return "xchat" in model_path
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+        padding_side = "left"
+        device_map = "auto"
+
+        tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False, legacy=True)
+        # set padding side to left for batch generation
+        tokenizer.padding_side = padding_side
+        # set pad token to eos token if pad token is not set (as is the case for llama models)
+        if tokenizer.pad_token is None:
+            tokenizer.pad_token = tokenizer.eos_token
+            tokenizer.pad_token_id = tokenizer.eos_token_id
+
+        if device_map:
+            model = AutoModelForCausalLM.from_pretrained(model_path, device_map=device_map)
+        else:
+            model = AutoModelForCausalLM.from_pretrained(model_path)
+            if torch.cuda.is_available():
+                model = model.cuda()
+        model.eval()
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("xchat")
+
+
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
 register_model_adapter(PeftModelAdapter)
@@ -1516,6 +1549,7 @@ register_model_adapter(BGEAdapter)
 register_model_adapter(Lamma2ChineseAdapter)
 register_model_adapter(VigogneInstructAdapter)
 register_model_adapter(VigogneChatAdapter)
+register_model_adapter(XChatAdapter)
 
 # After all adapters, try the default base adapter.
 register_model_adapter(BaseModelAdapter)
