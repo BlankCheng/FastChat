@@ -979,7 +979,7 @@ register_conv_template(
         name="xchat",
         system_template="""<|im_start|>system
 {system_message}""",
-        system_message="""A conversation between a user and an LLM-based AI assistant. The assistant gives helpful and honest answers.""",
+        system_message="""A conversation between a user and an LLM-based AI assistant developed by XLang. The assistant gives helpful and honest answers.""",
         roles=("<|im_start|>user", "<|im_start|>assistant"),
         messages=(),
         offset=0,
