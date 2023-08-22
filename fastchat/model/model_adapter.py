@@ -1484,9 +1484,10 @@ class XChatAdapter(BaseModelAdapter):
             tokenizer.pad_token_id = tokenizer.eos_token_id
 
         if device_map:
-            model = AutoModelForCausalLM.from_pretrained(model_path, device_map=device_map)
+            model = AutoModelForCausalLM.from_pretrained(model_path, device_map=device_map,
+                                                         low_cpu_mem_usage=True, torch_dtype=torch.float16)
         else:
-            model = AutoModelForCausalLM.from_pretrained(model_path)
+            model = AutoModelForCausalLM.from_pretrained(model_path, low_cpu_mem_usage=True, torch_dtype=torch.float16)
             if torch.cuda.is_available():
                 model = model.cuda()
         model.eval()
