@@ -13,6 +13,8 @@ from typing import Optional
 
 import openai
 import anthropic
+import torch
+from transformers import StoppingCriteria
 
 from fastchat.model.model_adapter import get_conversation_template
 
@@ -48,6 +50,23 @@ reverse_model_map = {
     "model_1": "model_2",
     "model_2": "model_1",
 }
+
+
+class KeyWordsCriteria(StoppingCriteria):
+    def __init__(self, stop_id_sequences):
+        assert isinstance(stop_id_sequences[0], list), "stop_id_sequences should be a list of list of ids"
+        self.stop_sequences = stop_id_sequences
+
+    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs) -> bool:
+        sequences_should_be_stopped = []
+        for i in range(input_ids.shape[0]):
+            sequence_should_be_stopped = False
+            for stop_sequence in self.stop_sequences:
+                if input_ids[i][-len(stop_sequence) :].tolist() == stop_sequence:
+                    sequence_should_be_stopped = True
+                    break
+            sequences_should_be_stopped.append(sequence_should_be_stopped)
+        return all(sequences_should_be_stopped)
 
 
 @dataclasses.dataclass

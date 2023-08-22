@@ -16,6 +16,7 @@ from icecream import ic
 
 from fastchat.llm_judge.common import load_questions, temperature_config
 from fastchat.model import load_model, get_conversation_template
+from fastchat.llm_judge.common import KeyWordsCriteria
 
 
 def run_eval(
@@ -122,6 +123,8 @@ def get_model_answers(
                         do_sample=do_sample,
                         temperature=temperature,
                         max_new_tokens=max_new_token,
+                        stopping_criteria=[KeyWordsCriteria(conv.stop_token_ids_sequence)
+                                           if conv.stop_token_ids_sequence else None]
                     )
                     if model.config.is_encoder_decoder:
                         output_ids = output_ids[0]
