@@ -33,8 +33,17 @@ def run_eval(
     max_gpu_memory,
 ):
     questions = load_questions(question_file, question_begin, question_end)
+    # Filter already run questions
+    already_run_question_set = set()
+    if os.path.exists(answer_file):
+        with open(answer_file) as f:
+            for line in f:
+                answer = json.loads(line)
+                already_run_question_set.add(answer["question_id"])
+    questions = [q for q in questions if q["question_id"] not in already_run_question_set]
     # random shuffle the questions to balance the loading
     random.shuffle(questions)
+    print(f"Total questions: {len(questions)}")
 
     # Split the question file into `num_gpus` files
     assert num_gpus_total % num_gpus_per_model == 0
