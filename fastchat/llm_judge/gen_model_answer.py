@@ -36,15 +36,18 @@ def run_eval(
     # Filter & deduplicate already run questions
     already_run_question_id_set = set()
     unique_run_question_list = []
+    num_lines_in_answer_file = 0
     if os.path.exists(answer_file):
         with open(answer_file) as f:
             for line in f:
+                num_lines_in_answer_file += 1
                 answer = json.loads(line)
                 if answer["question_id"] in already_run_question_id_set:
                     continue
                 already_run_question_id_set.add(answer["question_id"])
                 unique_run_question_list.append(answer)
     questions = [q for q in questions if q["question_id"] not in already_run_question_id_set]
+    print(f"Number of lines in answer file: {num_lines_in_answer_file}")
     print(f"Unique already run questions: {len(unique_run_question_list)}")
     if args.dedup:
         with open(answer_file, "w") as f:
