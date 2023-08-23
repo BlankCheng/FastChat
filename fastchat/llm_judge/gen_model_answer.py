@@ -55,7 +55,7 @@ def run_eval(
                 f.write(json.dumps(answer) + "\n")
     # random shuffle the questions to balance the loading
     random.shuffle(questions)
-    print(f"Total questions: {len(questions)}")
+    print(f"Total questions to inference: {len(questions)}")
 
     # Split the question file into `num_gpus` files
     assert num_gpus_total % num_gpus_per_model == 0
