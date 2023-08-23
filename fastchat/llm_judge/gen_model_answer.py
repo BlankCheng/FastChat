@@ -33,14 +33,23 @@ def run_eval(
     max_gpu_memory,
 ):
     questions = load_questions(question_file, question_begin, question_end)
-    # Filter already run questions
-    already_run_question_set = set()
+    # Filter & deduplicate already run questions
+    already_run_question_id_set = set()
+    unique_run_question_list = []
     if os.path.exists(answer_file):
         with open(answer_file) as f:
             for line in f:
                 answer = json.loads(line)
-                already_run_question_set.add(answer["question_id"])
-    questions = [q for q in questions if q["question_id"] not in already_run_question_set]
+                if answer["question_id"] in already_run_question_id_set:
+                    continue
+                already_run_question_id_set.add(answer["question_id"])
+                unique_run_question_list.append(answer)
+    questions = [q for q in questions if q["question_id"] not in already_run_question_id_set]
+    print(f"Unique already run questions: {len(unique_run_question_list)}")
+    if args.dedup:
+        with open(answer_file, "w") as f:
+            for answer in unique_run_question_list:
+                f.write(json.dumps(answer) + "\n")
     # random shuffle the questions to balance the loading
     random.shuffle(questions)
     print(f"Total questions: {len(questions)}")
@@ -240,6 +249,11 @@ if __name__ == "__main__":
         "--max-gpu-memory",
         type=str,
         help="Maxmum GPU memory used for model weights per GPU.",
+    )
+    parser.add_argument(
+        "--dedup",
+        action="store_true",
+        help="Whether to de-duplicate the answer file.",
     )
     args = parser.parse_args()
 
